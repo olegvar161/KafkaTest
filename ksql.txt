@@ -1,0 +1,22 @@
+
+CREATE TABLE t_cities_events (id VARCHAR PRIMARY KEY) WITH (KAFKA_TOPIC='cities_events', VALUE_FORMAT='JSON');
+
+select * from  T_CITIES_EVENTS EMIT CHANGES;
+
+CREATE STREAM s_cities_events(
+	      city VARCHAR,
+          event VARCHAR)
+ WITH (KAFKA_TOPIC='cities_events',
+       VALUE_FORMAT='JSON',
+       PARTITIONS=1);
+
+select * from  s_CITIES_EVENTS EMIT CHANGES;
+
+  CREATE TABLE pageviews_regions WITH (KEY_FORMAT='JSON')
+  AS SELECT city, COUNT(*) AS numusers
+  FROM s_CITIES_EVENTS
+  WINDOW TUMBLING (SIZE 30 SECOND)
+  GROUP BY city
+  EMIT CHANGES;
+
+
